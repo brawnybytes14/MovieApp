@@ -1,0 +1,346 @@
+﻿@model DeltaX.ViewModels.MovieViewModel
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>@ViewBag.Title</h2>
+<p>
+   <b> @Html.ActionLink("Back to List", "Index")</b>
+</p>
+<hr>
+@using (Html.BeginForm("Save", "Movies", FormMethod.Post, new { enctype = "multipart/form-data" }))
+{
+    @Html.AntiForgeryToken()
+
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4">
+                <span class="text-danger" id="fileError"></span>
+                <img class="img-responsive" style="height:200px;border:1px solid lightgray" id="poster" src='@Url.Content(string.IsNullOrEmpty(Model.Movie.Poster)? "~/Images/Posters/dummyPoster.png" : Model.Movie.Poster)' alt="Poster" width="460" height="200"> 
+            
+                    <div class="form-group">
+                
+                  <div class="text-center"> <br> <label for="File" class="btn btn-primary">Upload Poster</label></div>
+                    <input type='file' id="File" style="visibility:hidden;" name="File" onchange="displayPoster(this);" />
+                      
+
+                </div>
+            </div>
+            <div class="col-md-3">
+                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                @Html.HiddenFor(model => model.Movie.Id)
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.Movie.Name, htmlAttributes: new { @class = "" })
+                    @Html.EditorFor(model => model.Movie.Name, new { htmlAttributes = new { @class = "form-control",placeholder="e.g. Titanic" } })
+                    @Html.ValidationMessageFor(model => model.Movie.Name, "", new { @class = "text-danger" })
+
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.Movie.Year, htmlAttributes: new { @class = "" })
+
+                    @Html.EditorFor(model => model.Movie.Year, new { htmlAttributes = new { @class = "form-control",placeholder="e.g. 2018" } })
+                    @Html.ValidationMessageFor(model => model.Movie.Year, "", new { @class = "text-danger" })
+
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.Movie.Plot, htmlAttributes: new { @class = "" })
+
+                    @Html.EditorFor(model => model.Movie.Plot, new { htmlAttributes = new { @class = "form-control" ,placeholder="Write short storyline here." } })
+                    @Html.ValidationMessageFor(model => model.Movie.Plot, "", new { @class = "text-danger" })
+
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.Movie.ProducerId, htmlAttributes: new { @class = "" })
+
+                    @Html.DropDownListFor(model => model.Movie.ProducerId, new SelectList(Model.Producers, "Id", "Name"), "Select One", new { id = "selectProducer", @class = "selectpicker form-control" })
+                    @Html.ValidationMessageFor(model => model.Movie.ProducerId, "", new { @class = "text-danger" })
+
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.ActorIds, htmlAttributes: new { @class = "" })
+                    <div>
+                        @Html.ListBoxFor(model => model.ActorIds, new MultiSelectList(Model.Actors, "Id", "Name"), new { id = "multiselect", multiple = "multiple", @class = "selectpicker form-control" })
+                        <div>  @Html.ValidationMessageFor(model => model.ActorIds, "", new { id="actorsError",@class = "text-danger" })  </div>
+                    </div>
+                </div>
+              
+
+                <div class="form-group">
+
+                    <input type="submit" value="Save" class="btn btn-primary" />
+
+                </div>
+            </div>
+            <div class="col-md-5">
+                <div class="text-center">
+                    <input type="button" onclick="addProducerClick();" class="btn btn-primary" data-toggle="modal" data-target="#addProducer" value="Add Producer" />
+                    <input type="button" onclick="addActorClick();" class="btn btn-primary" data-toggle="modal" value="Add Actor" data-target="#addActor" />
+                </div>
+                </div>
+            </div>
+        </div>
+}
+
+@section  scripts{
+
+    @Scripts.Render("~/bundles/jqueryval")
+    <script src="~/Scripts/jquery.unobtrusive-ajax.min.js"></script>
+    <script type="text/javascript">
+
+        function addActorClick() {
+            $('#actorSuccessMessage').html("");
+        }
+    
+        function addProducerClick() {
+            $('#producerSuccessMessage').html("");
+        }
+
+        function UpdateActors() {
+             var actorsList = $("#multiselect");
+            $.getJSON('@Url.Action("getactors")', function (actors) {
+                $.each(actors, function (index, actor) {
+                    var isExistOption = $("#multiselect option[value='" + actor.Id + "']").length > 0;
+                    if (isExistOption == false) {
+        
+                        actorsList.append($('<option/>', {
+                            value: actor.Id,
+                            text: actor.Name
+        
+                        }));
+                   }
+                   
+                });
+                $("#multiselect").selectpicker('refresh');
+             });
+        }
+        
+        $("#multiselect").on('show.bs.select',function () {
+            UpdateActors();
+        });
+
+        $(document).ready(function () {
+            $.ajaxSetup({ cache: false });
+        });
+
+        function UpdateProducers() {
+              var producersList = $("#selectProducer");
+            $.getJSON('@Url.Action("getproducers")', function (producers) {
+                $.each(producers, function (index, producer) {
+                    var isExistOption = $("#selectProducer option[value='" + producer.Id + "']").length > 0;
+                    if (isExistOption == false) {
+                        producersList.append($('<option/>', {
+                            value: producer.Id,
+                            text: producer.Name
+                        }));
+                    }
+                });
+                $("#selectProducer").selectpicker('refresh');
+             });
+        
+        }
+
+        $("#selectProducer").on('show.bs.select', function () {
+            UpdateProducers();
+        });
+
+        function displayPoster(input) {
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+    
+                reader.onload = function (e) {
+                    $('#poster')
+                        .attr('src', e.target.result)
+                        .width(460)
+                        .height(200);
+                };
+    
+                reader.readAsDataURL(input.files[0]);
+            }
+            var ext = $('#File').val().split('.').pop().toLowerCase();
+    
+            if ($.inArray(ext, ['gif', 'png', 'jpg', 'jpeg']) == -1) {
+                $('#fileError').html("Please select a valid file.");
+                $('#File').val(null);
+            }
+            else {
+                $('#fileError').html("");
+              
+            }
+        }
+    
+        function OnSuccessActor(response) {
+            $('#form0').trigger("reset");
+            $('#actorSuccessMessage').html('<b>"' + response.Name + '"' + " successully added. Add more actors.</b>");
+            UpdateActors();
+        }
+    
+        function OnFailureActor(response) {
+            alert("Error occured.");
+        }
+        
+        function OnSuccessProducer(response) {
+             $('#form1').trigger("reset");
+            $('#producerSuccessMessage').html('<b>"' + response.Name + '"' + " successully added. Add more producers.</b>");
+            UpdateProducers();
+        }
+    
+        function OnFailureProducer(response) {
+             alert("Error occured.");
+        }
+    </script>
+
+}
+
+<div class="container">
+    <div class="modal fade" id="addActor" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Add Actor</h4>
+                </div>
+                <div class="text-center text-success" id="actorSuccessMessage"></div>
+                <div class="modal-body">
+
+                    @using (Ajax.BeginForm("SaveActor", "Movies", new AjaxOptions
+                    {
+                        OnSuccess = "OnSuccessActor",
+                        OnFailure = "OnFailureActor"
+
+                    }))
+                    {
+                        @Html.AntiForgeryToken()
+                        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                        @Html.HiddenFor(model => model.Actor.Id)
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.Actor.Name, htmlAttributes: new { @class = "" })
+                            @Html.EditorFor(model => model.Actor.Name, new { htmlAttributes = new { @class = "form-control" } })
+                            @Html.ValidationMessageFor(model => model.Actor.Name, "", new { @class = "text-danger" })
+
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.Actor.Sex, htmlAttributes: new { @class = "" })
+                            <div>
+                                <label class="radio-inline">
+                                    @Html.RadioButtonFor(m => m.Actor.Sex, "Male")<text>Male</text>
+                                </label>
+                                <label class="radio-inline">
+                                    @Html.RadioButtonFor(m => m.Actor.Sex, "Female")<text>Female</text>
+                                </label>
+                                @Html.ValidationMessageFor(model => model.Actor.Sex, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.Actor.DOB, htmlAttributes: new { @class = "" })
+
+                            @Html.EditorFor(model => model.Actor.DOB, new { htmlAttributes = new { @class = "form-control",placeholder="dd-mm-yyyy" } })
+                            @Html.ValidationMessageFor(model => model.Actor.DOB, "", new { @class = "text-danger" })
+
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.Actor.Bio, htmlAttributes: new { @class = "" })
+
+                            @Html.EditorFor(model => model.Actor.Bio, new { htmlAttributes = new { @class = "form-control",placeholder="Write short bio here." } })
+                            @Html.ValidationMessageFor(model => model.Actor.Bio, "", new { @class = "text-danger" })
+
+                        </div>
+
+                        <div class="form-group">
+
+                            <input type="submit" value="Save" class="btn btn-primary" />
+
+                        </div>
+                    }
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+<div class="container">
+    <div class="modal fade" id="addProducer" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Add Producer</h4>
+                </div>
+                <div class="text-center text-success" id="producerSuccessMessage"></div>
+                <div class="modal-body">
+                    @using (Ajax.BeginForm("SaveProducer", "Movies", new AjaxOptions
+                    {
+                        OnSuccess = "OnSuccessProducer",
+                        OnFailure = "OnFailureProducer"
+                    }))
+                    {
+                        @Html.AntiForgeryToken()
+                        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                        @Html.HiddenFor(model => model.Producer.Id)
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.Producer.Name, htmlAttributes: new { @class = "" })
+                            @Html.EditorFor(model => model.Producer.Name, new { htmlAttributes = new { @class = "form-control" } })
+                            @Html.ValidationMessageFor(model => model.Producer.Name, "", new { @class = "text-danger" })
+
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.Producer.Sex, htmlAttributes: new { @class = "" })
+                            <div>
+                                <label class="radio-inline">
+                                    @Html.RadioButtonFor(m => m.Producer.Sex, "Male")<text>Male</text>
+                                </label>
+                                <label class="radio-inline">
+                                    @Html.RadioButtonFor(m => m.Producer.Sex, "Female")<text>Female</text>
+                                </label>
+                                @Html.ValidationMessageFor(model => model.Producer.Sex, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.Producer.DOB, htmlAttributes: new { @class = "" })
+
+                            @Html.EditorFor(model => model.Producer.DOB, new { htmlAttributes = new { @class = "form-control",placeholder="dd-mm-yyyy" } })
+                            @Html.ValidationMessageFor(model => model.Producer.DOB, "", new { @class = "text-danger" })
+
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.Producer.Bio, htmlAttributes: new { @class = "" })
+
+                            @Html.EditorFor(model => model.Producer.Bio, new { htmlAttributes = new { @class = "form-control",placeholder="Write short bio here." } })
+                            @Html.ValidationMessageFor(model => model.Producer.Bio, "", new { @class = "text-danger" })
+
+                        </div>
+
+                        <div class="form-group">
+
+                            <input type="submit" value="Save" class="btn btn-primary" />
+
+                        </div>
+                    }
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</div>
