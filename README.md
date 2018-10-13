@@ -1,4 +1,4 @@
-# DeltaX Movie Application
+# MovieApp
 
 ## Software development tools used to build this application: 
 * **IDE:** Microsoft Visual Studio Community 2017 
