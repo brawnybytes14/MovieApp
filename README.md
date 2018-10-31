@@ -10,10 +10,11 @@
 ## Setup instructions: 
 *	Download the ZIP file using **clone or download** option and extract it. 
 *	Open the extracted folder and open **DeltaX.sln** file with **Microsoft Visual Studio 2015** or **higher version**. 
-*	Run the Web Application. 
+*	Run the Web Application.
  
 ## Additional information (Not required): 
-*	SQL File Location: **~/DeltaX/DBScripts/** 
+*	SQL File Location: **~/DeltaX/DBScripts/**
+* Make sure you are using the tools mentioned above to avoid compatibility issues.
 
 ## Screenshots:
 ![alt tag](https://github.com/rohitkori/DeltaX/blob/master/DeltaX/Screenshots/movies.PNG)
