@@ -15,9 +15,10 @@
 ## Additional information (Not required): 
 *	SQL File Location: **~/DeltaX/DBScripts/**
 * Make sure you are using the tools mentioned above to avoid compatibility issues.
-
-<> ## Screenshots:
-[comment]: <> ![alt tag](https://github.com/rohitkori/DeltaX/blob/master/DeltaX/Screenshots/movies.PNG)
-[comment]: <> ![alt tag](https://github.com/rohitkori/DeltaX/blob/master/DeltaX/Screenshots/editMovie.PNG)
-[comment]: <> ![alt tag](https://github.com/rohitkori/DeltaX/blob/master/DeltaX/Screenshots/addproducertomovie.PNG)
-[comment]: <> ![alt tag](https://github.com/rohitkori/DeltaX/blob/master/DeltaX/Screenshots/addmovie.PNG)
+{::comment}
+## Screenshots:
+![alt tag](https://github.com/rohitkori/DeltaX/blob/master/DeltaX/Screenshots/movies.PNG)
+![alt tag](https://github.com/rohitkori/DeltaX/blob/master/DeltaX/Screenshots/editMovie.PNG)
+![alt tag](https://github.com/rohitkori/DeltaX/blob/master/DeltaX/Screenshots/addproducertomovie.PNG)
+![alt tag](https://github.com/rohitkori/DeltaX/blob/master/DeltaX/Screenshots/addmovie.PNG)
+{:/comment}
